@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 // Framer Motion
 import { motion } from 'framer-motion'
@@ -9,7 +9,7 @@ import { motion } from 'framer-motion'
 import { fadeIn } from "../../../variants";
 
 // Rich Text Editor
-import JoditEditor from 'jodit-react';
+// import JoditEditor from 'jodit-react';
 
 const HTMLEditor = () => {
 
@@ -17,6 +17,18 @@ const HTMLEditor = () => {
     const [content, setContent] = useState('');
 
     const [showHtmlSource, setShowHtmlSource] = useState(false);
+
+    const [editorLoaded, setEditorLoaded] = useState(false);
+    const [JoditEditor, setJoditEditor] = useState(null);
+
+    useEffect(() => {
+        import('jodit-react').then(module => {
+            setJoditEditor(module.default);
+            setEditorLoaded(true);
+        });
+    }, []);
+
+    if (!editorLoaded) return null;
 
     return (
         <section className="section h-[1300px] xsm:h-[1200px] sm:h-full xl:h-[1000px] flex items-center" id="htmleditor">
