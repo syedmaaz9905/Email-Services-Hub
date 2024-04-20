@@ -14,29 +14,49 @@ import Lottie from 'lottie-react';
 // Animation
 import buttonAnimationData from './../../../public/animated_videos/emailExtractor_animation.json'
 
+import { saveAs } from 'file-saver';
+
+// Sweet Alert
+import Swal from 'sweetalert2';
+
 const EmailExtractor = () => {
 
     const [animationPlayed, setAnimationPlayed] = useState(false);
     const [textEmailAreaValue, setTextEmailAreaValue] = useState('');
     const [textResultValue, setTextResultValue] = useState('')
 
+    const [extractedEmails, setExtractedEmails] = useState();
+
     const handleButtonClick = () => {
         setAnimationPlayed(true);
-        console.log("Hello")
-
-        console.log(textEmailAreaValue, 'This is the text')
 
         var outputText = extractEmails(textEmailAreaValue);
 
         outputText = [...new Set(outputText)];
 
-        outputText = categorizeEmails(outputText);
+        var categorizedOutputText = categorizeEmails(outputText);
 
-        console.log(outputText)
+        setExtractedEmails(categorizedOutputText);
+
+        console.log(outputText, typeof (outputText))
         console.log(outputText.join('\n'))
 
         setTextResultValue(outputText.join('\n'))
 
+    };
+
+    const handleDownloadButtonClick = () => {
+        if (extractedEmails && Object.keys(extractedEmails).length > 0) {
+            const csvContent = convertToCSV(extractedEmails);
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+            saveAs(blob, 'extracted_emails.csv');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'No emails extracted!',
+            });
+        }
     };
 
     const handleClearButtonClick = () => {
@@ -57,9 +77,9 @@ const EmailExtractor = () => {
 
         emails.forEach(email => {
             const domain = email.split('@')[1];
-            
+
             const serviceProvider = domain.split('.')[0];
-            
+
             if (emailCategories[serviceProvider]) {
                 emailCategories[serviceProvider].push(email);
             } else {
@@ -68,6 +88,22 @@ const EmailExtractor = () => {
         });
 
         return emailCategories;
+    }
+
+    function convertToCSV(obj) {
+        const headers = Object.keys(obj).join(',') + '\n';
+        const maxLength = Math.max(...Object.values(obj).map(arr => arr.length));
+        let csv = '';
+        for (let i = 0; i < maxLength; i++) {
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    csv += obj[key][i] || '';
+                    csv += ',';
+                }
+            }
+            csv = csv.slice(0, -1) + '\n';
+        }
+        return headers + csv;
     }
 
     return (
@@ -169,8 +205,10 @@ const EmailExtractor = () => {
                                 whileInView={"show"}
                                 viewport={{ once: false, amount: 0.6 }}
                                 class="w-[100%] h-36 overflow-y-auto border-2 border-solid bg-white p-4 rounded-md flex flex-col"
-                                value={textResultValue}
                             >
+                                {textResultValue.split('\n').map((email, index) => (
+                                    <p key={index}>{email}</p>
+                                ))}
                             </motion.div>
                         </div>
 
@@ -205,6 +243,16 @@ const EmailExtractor = () => {
                             Email Extractor is a simple little tool that will help you find email addresses hidden in a content. Just copy the entire block of text and paste it in the above input box. All you have to do is click on the “Extract Email” button, it will find all the email addresses present in your input text. Any duplicate address will be ignored safely, as a final result, you get a unique list of all emails extracted.
 
                         </motion.p>
+                        <motion.button
+                            variants={fadeIn('up', 0.6)}
+                            initial="hidden"
+                            whileInView={"show"}
+                            viewport={{ once: false, amount: 0.6 }}
+                            onClick={handleDownloadButtonClick}
+                            className="flex flex-row items-center mt-4 p-[1rem] rounded-[10px] bg-gray-400 hover:bg-black hover:scale-105 transition-all duration-300 text-white"
+                        >
+                            Download
+                        </motion.button>
                     </div>
                 </div>
             </div>

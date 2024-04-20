@@ -8,19 +8,26 @@ import { motion } from 'framer-motion'
 // Variants
 import { fadeIn } from "../../../variants";
 
+// Sweet Alert
+import Swal from 'sweetalert2';
+
 const Base64Encode = () => {
 
     const [activeTab, setActiveTab] = useState(0);
-
     const [isChecked, setIsChecked] = useState(false);
-
     const [selectedValue, setSelectedValue] = useState("UTF-8");
-
+    const [inputText, setInputText] = useState("");
+    const [outputText, setOutputText] = useState("");
+    const [encodedURL, setEncodedURL] = useState("");
     const [fileName, setFileName] = useState("");
-
     const inputRef = useRef(null);
-
     const inputRefDownload = useRef(null);
+    const [inputDecode, setInputDecode] = useState("");
+    const [outputDecode, setOutputDecode] = useState("");
+    const [decodedURL, setDecodedURL] = useState("");
+    const inputRefDecode = useRef(null);
+    const [base64Input, setBase64Input] = useState("");
+    const [fileContent, setFileContent] = useState("");
 
     const handleChange = (event) => {
         setSelectedValue(event.target.value);
@@ -31,7 +38,40 @@ const Base64Encode = () => {
     };
 
     const handleButtonClick = () => {
-        console.log('Encode button clicked');
+        if (!inputText) return; // Check if input text is empty
+
+        let encodedText = "";
+        switch (selectedValue) {
+            case "UTF-8":
+                encodedText = btoa(unescape(encodeURIComponent(inputText)));
+                break;
+            case "UTF-16LE":
+            case "UTF-16BE":
+            case "IBM866":
+            case "ISO-8859-2":
+            case "ISO-8859-3":
+            case "ISO-8859-4":
+            case "ISO-8859-5":
+            case "ISO-8859-6":
+            case "ISO-8859-7":
+            case "ISO-8859-8":
+                encodedText = btoa(unescape(encodeURIComponent(inputText)));
+                break;
+            case "Hex":
+                // Convert hex string to bytes and then to base64
+                const bytes = inputText.match(/.{1,2}/g).map((byte) => parseInt(byte, 16));
+                const uint8Array = new Uint8Array(bytes);
+                encodedText = btoa(String.fromCharCode.apply(null, uint8Array));
+                break;
+            default:
+                break;
+        }
+
+        setOutputText(encodedText);
+
+        // Construct the encoded URL
+        const url = `https://emn178.github.io/online-tools/base64_encode.html?input_type=${selectedValue}&input=${encodeURIComponent(inputText)}`;
+        setEncodedURL(url);
     };
 
     const handleCopy = () => {
@@ -39,14 +79,75 @@ const Base64Encode = () => {
         document.execCommand('copy');
     };
 
+    const handleDecodeClick = () => {
+        if (!inputDecode) return; // Check if input text is empty
+
+        try {
+            const decodedText = atob(inputDecode.trim());
+            setOutputDecode(decodedText);
+
+            // Construct the decoded URL
+            const url = `https://emn178.github.io/online-tools/base64_decode.html?input=${encodeURIComponent(inputDecode)}`;
+            setDecodedURL(url);
+        } catch (error) {
+            // Show error message using SweetAlert2
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Invalid Base64 input! Please enter a valid Base64 string.',
+            });
+        }
+    };
+
+    const handleCopyDecode = () => {
+        inputRefDecode.current.select();
+        document.execCommand('copy');
+    };
+
     const handleDownload = () => {
-        inputRefDownload.current.select();
-        document.execCommand('download');
+        if (!base64Input) return; // Check if input is empty
+
+        try {
+            const decodedText = atob(base64Input.trim()); // Decode Base64 string
+            const blob = new Blob([decodedText], { type: "text/plain" }); // Create blob from decoded text
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "download.txt"; // Set default file name
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            // Show error message using SweetAlert2
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Invalid Base64 input! Please enter a valid Base64 string.',
+            });
+        }
     };
 
     const handleFileSelect = (event) => {
         const file = event.target.files[0];
         setFileName(file ? file.name : "");
+        readFileContent(file); // Read file content when file is selected
+    };
+
+    const readFileContent = (file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const content = event.target.result;
+            setFileContent(content); // Set file content to state
+        };
+        reader.readAsText(file);
+    };
+
+    const handleFileEncode = () => {
+        if (!fileContent) return; // Check if file content is empty
+
+        const encodedText = btoa(fileContent); // Encode file content to Base64
+        setOutputText(encodedText);
     };
 
     const tabs = [
@@ -80,28 +181,29 @@ const Base64Encode = () => {
                         </select>
                     </div>
                     <div>
-                        <textarea placeholder='Enter Input Here ...' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Enter Input Here ...'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={inputText}
+                            onChange={(e) => setInputText(e.target.value)}
+                        />
                     </div>
                     <div className='flex flex-row items-center justify-center gap-4 mt-4'>
                         <button onClick={handleButtonClick} className='p-2 rounded-md bg-slate-400 hover:bg-black hover:text-white duration-300'>Encode</button>
-                        <div>
-                            <input
-                                className='mr-2'
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={handleCheckboxChange}
-                            />
-                            <label>Auto Update</label>
-                        </div>
                     </div>
                     <div>
-                        <textarea placeholder='Output' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Output'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={outputText}
+                            readOnly
+                            ref={inputRef}
+                        />
                     </div>
                     <div className='flex flex-row items-center mt-4'>
                         <input
                             type="text"
-                            value="https://"
-                            ref={inputRef}
+                            value={encodedURL}
                             readOnly
                             className='bg-white flex w-[calc(100%-50px)] h-[40px] p-3 border border-[#cdcdcd] rounded-l-md resize-none'
                         />
@@ -121,32 +223,33 @@ const Base64Encode = () => {
                         This Base64 decode online tool helps you decode Base64 string to original text.
                     </p>
                     <div>
-                        <textarea placeholder='Enter Input Here ...' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Enter Input Here ...'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={inputDecode}
+                            onChange={(e) => setInputDecode(e.target.value)}
+                        />
                     </div>
                     <div className='flex flex-row items-center justify-center gap-4 mt-4'>
-                        <button onClick={handleButtonClick} className='p-2 rounded-md bg-slate-400 hover:bg-black hover:text-white duration-300'>Decode</button>
-                        <div>
-                            <input
-                                className='mr-2'
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={handleCheckboxChange}
-                            />
-                            <label>Auto Update</label>
-                        </div>
+                        <button onClick={handleDecodeClick} className='p-2 rounded-md bg-slate-400 hover:bg-black hover:text-white duration-300'>Decode</button>
                     </div>
                     <div>
-                        <textarea placeholder='Output' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Output'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={outputDecode}
+                            readOnly
+                            ref={inputRefDecode}
+                        />
                     </div>
                     <div className='flex flex-row items-center mt-4'>
                         <input
                             type="text"
-                            value="https://"
-                            ref={inputRef}
+                            value={decodedURL}
                             readOnly
                             className='bg-white flex w-[calc(100%-50px)] h-[40px] p-3 border border-[#cdcdcd] rounded-l-md resize-none'
                         />
-                        <button onClick={handleCopy} className='bg-blue-500 hover:bg-blue-700 duration-300 text-white font-bold py-2 px-4 rounded-r-md'>
+                        <button onClick={handleCopyDecode} className='bg-blue-500 hover:bg-blue-700 duration-300 text-white font-bold py-2 px-4 rounded-r-md'>
                             Copy
                         </button>
                     </div>
@@ -159,7 +262,7 @@ const Base64Encode = () => {
             content: (
                 <div className='mt-4'>
                     <p className="text-description text-center mb-4">
-                        This file to Base64 online tool helps you encode file to Base64 string to without uploading file.
+                        This file to Base64 online tool helps you encode file to Base64 string without uploading the file.
                     </p>
                     <div className='bg-white'>
                         <label htmlFor="fileInput" className="custom-file-input">
@@ -176,17 +279,17 @@ const Base64Encode = () => {
                         />
                         <style jsx>{`
                             .custom-file-input {
-                            cursor: pointer;
+                                cursor: pointer;
                             }
                             .file-box {
-                            border: 2px dashed #cdcdcd;
-                            padding: 20px;
-                            text-align: center;
+                                border: 2px dashed #cdcdcd;
+                                padding: 20px;
+                                text-align: center;
                             }
                         `}</style>
                     </div>
                     <div className='flex flex-row items-center justify-center gap-4 mt-4'>
-                        <button onClick={handleButtonClick} className='p-2 rounded-md bg-slate-400 hover:bg-black hover:text-white duration-300'>Encode</button>
+                        <button onClick={handleFileEncode} className='p-2 rounded-md bg-slate-400 hover:bg-black hover:text-white duration-300'>Encode</button>
                         <div>
                             <input
                                 className='mr-2'
@@ -198,13 +301,19 @@ const Base64Encode = () => {
                         </div>
                     </div>
                     <div>
-                        <textarea placeholder='Output' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Output'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={outputText} // Display the encoded file content
+                            readOnly
+                        />
                     </div>
                 </div>
+
             ),
         },
         {
-            title: "Base4 to File",
+            title: "Base64 to File",
             heading: "Decode Base64 to File",
             content: (
                 <div className='mt-4'>
@@ -212,12 +321,18 @@ const Base64Encode = () => {
                         This Base64 to file online tool helps you decode Base64 string to file and download.
                     </p>
                     <div>
-                        <textarea placeholder='Enter Input Here ...' className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none' />
+                        <textarea
+                            placeholder='Enter Base64 Here ...'
+                            className='mt-8 bg-white flex w-[100%] h-[100px] p-3 border border-[#cdcdcd] rounded-md resize-none'
+                            value={base64Input}
+                            onChange={(e) => setBase64Input(e.target.value)}
+                            ref={inputRefDownload}
+                        />
                     </div>
                     <div className='flex flex-row items-center mt-4'>
                         <input
                             type="text"
-                            value="https://"
+                            value={fileName ? fileName : "download.txt"}
                             ref={inputRefDownload}
                             readOnly
                             className='bg-white flex w-[calc(100%-50px)] h-[40px] p-3 border border-[#cdcdcd] rounded-l-md resize-none'

@@ -90,6 +90,23 @@ const Header = () => {
                         Home
                     </Link>
 
+                    {/* Dropdown */}
+                    <div>
+                        <div
+                            className="cursor-pointer hover:font-bold duration-300"
+                            onClick={toggleDropdown}
+                        >
+                            Services
+                        </div>
+                        <div className={`absolute flex flex-col w-44 bg-white border border-gray-300 rounded shadow-lg ${dropdownOpen ? '' : 'hidden'}`}>
+                            <Link to="emailextractor" smooth={true} spy={true} className="block cursor-pointer hover:font-bold duration-300 px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Email Extractor</Link>
+                            <Link to="htmleditor" smooth={true} spy={true} className="block cursor-pointer hover:font-bold duration-300 px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Html Editor</Link>
+                            <Link to="base64" smooth={true} spy={true} className="block cursor-pointer hover:font-bold duration-300 px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Base64</Link>
+                            <Link to="emailvalidator" smooth={true} spy={true} className="block cursor-pointer hover:font-bold duration-300 px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Email Validator</Link>
+                            <Link to="randomnameaddressgenerator" smooth={true} spy={true} className="block cursor-pointer hover:font-bold duration-300 px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Random Name & Address Generator</Link>
+                        </div>
+                    </div>
+
                     <Link
                         className="cursor-pointer hover:font-bold duration-300"
                         to="services"
@@ -97,7 +114,7 @@ const Header = () => {
                         smooth={desktopMode}
                         spy={true}
                     >
-                        Services
+                        Features
                     </Link>
 
                     <Link
@@ -119,23 +136,6 @@ const Header = () => {
                     >
                         Why Us
                     </Link>
-
-                    {/* Dropdown */}
-                    {/* <div className="inline-block">
-                        <div
-                            className="cursor-pointer hover:font-bold duration-300"
-                            onClick={toggleDropdown}
-                        >
-                            Dropdown
-                        </div>
-                        <div className={`flex flex-col w-32 bg-white border border-gray-300 rounded shadow-lg ${dropdownOpen ? '' : 'hidden'}`}>
-                            <Link to="emailextractor" smooth={true} spy={true} className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Email Extractor</Link>
-                            <Link to="htmleditor" smooth={true} spy={true} className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Html Editor</Link>
-                            <Link to="base64" smooth={true} spy={true} className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Base64</Link>
-                            <Link to="emailvalidator" smooth={true} spy={true} className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Email Validator</Link>
-                            <Link to="randomnameaddressgenerator" smooth={true} spy={true} className="block px-4 py-2 text-gray-800 hover:bg-gray-200" onClick={() => setDropdownOpen(false)}>Random Name & Address Generator</Link>
-                        </div>
-                    </div> */}
 
                     <Link
                         className="cursor-pointer hover:font-bold duration-300"
