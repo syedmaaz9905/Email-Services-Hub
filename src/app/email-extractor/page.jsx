@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion'
 
 // Variants
-import { fadeIn } from "../../../variants";
+import { fadeIn } from '../../../variants';
 
 // Lottie
 import Lottie from 'lottie-react';
@@ -107,7 +107,7 @@ const EmailExtractor = () => {
     }
 
     return (
-        <section className="section h-[1500px] xsm:h-[1300px] md:h-[1000px] flex items-center bg-[#b2b7c2]/10" id="emailextractor">
+        <section className="section h-[1500px] xsm:h-[1300px] md:h-[1000px] flex items-center bg-[#fff]" id="emailextractor">
             <div className="container mx-auto max-w-[1200px]">
 
                 <div className="flex flex-col items-center justify-center">

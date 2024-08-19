@@ -8,7 +8,7 @@ import { fadeIn } from "../../../variants";
 
 const EmailAddressValidator = () => {
     return (
-        <section className="section h-[1300px] xsm:h-[1200px] sm:h-full xl:h-[1000px] flex items-center" id="emailvalidator">
+        <section className="section h-[1300px] xsm:h-[1200px] sm:h-full xl:h-[1000px] bg-[#fff] flex items-center" id="emailvalidator">
             <div className="container mx-auto">
                 <motion.h2
                     variants={fadeIn('down', 0.2)}

@@ -347,7 +347,7 @@ const Base64Encode = () => {
     ];
 
     return (
-        <section className="section h-[1500px] xsm:h-[1300px] md:h-[1000px] flex items-center bg-[#b2b7c2]/10" id="base64">
+        <section className="section h-[1500px] xsm:h-[1300px] md:h-[1000px] flex items-center bg-[#fff]" id="base64">
             <div className="container mx-auto max-w-[1200px]">
 
                 <div className="flex flex-col items-center justify-center">
